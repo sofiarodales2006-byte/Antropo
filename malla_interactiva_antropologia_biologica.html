@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Malla Antropología Biológica – Modo Manija</title>
+  <style>
+    body{
+      font-family:'Segoe UI',sans-serif;
+      background:#f6f1f3;
+      padding:30px;
+      color:#4a3b3f
+    }
+    h1{text-align:center;font-weight:500;letter-spacing:1px}
+    .resumen{text-align:center;font-size:18px;margin-bottom:12px}
+    .barra{width:70%;margin:12px auto;height:18px;background:#e6d8dd;border-radius:20px;overflow:hidden}
+    .progreso{height:100%;width:0%;background:#c97c8a;transition:.4s}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:25px;margin-top:30px}
+    .semestre{
+      background:#fdfbfc;
+      padding:18px;
+      border-radius:22px;
+      box-shadow:0 8px 20px rgba(0,0,0,.08)
+    }
+    .semestre h2{
+      text-align:center;
+      font-size:18px;
+      font-weight:500;
+      margin-bottom:12px;
+      color:#7a4a55
+    }
+    .materia{
+      background:#f1e4e8;
+      padding:12px 14px;
+      border-radius:16px;
+      margin:8px 0;
+      cursor:pointer;
+      transition:.25s
+    }
+    .materia:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.08)}
+    .materia.aprobada{background:#d8a7b1;color:#fff}
+    .materia.bloqueada{
+      background:#eee;
+      color:#aaa;
+      cursor:not-allowed;
+      box-shadow:none
+    }
+    .estado{text-align:center;margin:20px;font-weight:500;color:#7a4a55}
+  </style>
+</head>
+<body>
+
+<h1>Antropología Biológica – Malla Interactiva (Modo Manija 🔥)</h1>
+<div class="resumen">Créditos aprobados: <span id="creditos">0</span> / 360</div>
+<div class="barra"><div id="progreso" class="progreso"></div></div>
+<div class="estado" id="estado"></div>
+
+<div id="malla" class="grid"></div>
+
+<script>
+const TOTAL=360;
+let creditos=0;
+const requisitos={
+  4:120,
+  5:140,
+  7:190
+};
+
+const malla=[
+ {s:1,m:[['IVU',2],['Introducción a la Antropología',15],['Estadística General',11],['Etnografías',12]]},
+ {s:2,m:[['Metodología y técnicas',14],['Prehistoria general',12],['Evolución humana',8],['Epistemología / Filosofía de la Ciencia',8]]},
+ {s:3,m:[['Teoría Antropológica',12],['Antropología Social I',8],['Osteología Humana',8],['Prehistoria Americana I',8],['Lengua Extranjera',8],['Formación en Extensión',4]]},
+ {s:4,m:[['Antropología Social II / IV',8],['Biología–Cultura',8],['Prehistoria Americana II',8],['Teoría en Antropología Biológica',12],['Electivas',12]]},
+ {s:5,m:[['Metodología específica',16],['Capacitación pasantía',19],['Electivas',10]]},
+ {s:6,m:[['Seminario Ética y DDHH',19],['Optativas Biológica',16],['Electivas',10]]},
+ {s:7,m:[['Seminario I Antropología Biológica',19],['Optativas área',20],['Práctica en Extensión',8]]},
+ {s:8,m:[['Seminario II Antropología Biológica',19],['Electivas',26]]}
+];
+
+const cont=document.getElementById('malla');
+const txt=document.getElementById('creditos');
+const barra=document.getElementById('progreso');
+const estado=document.getElementById('estado');
+
+function guardar(){localStorage.setItem('creditos',creditos)}
+function cargar(){creditos=Number(localStorage.getItem('creditos'))||0}
+
+function actualizar(){
+ txt.textContent=creditos;
+ barra.style.width=(creditos/TOTAL*100)+'%';
+ estado.textContent=creditos>=TOTAL?'🎓 CARRERA COMPLETA':'Te faltan '+(TOTAL-creditos)+' créditos';
+}
+
+cargar();actualizar();
+
+malla.forEach(b=>{
+ const box=document.createElement('div');box.className='semestre';box.innerHTML='<h2>Semestre '+b.s+'</h2>';
+ b.m.forEach(mat=>{
+  const d=document.createElement('div');d.className='materia';d.textContent=mat[0]+' ('+mat[1]+')';
+  let ok=false;
+  function bloqueada(){return requisitos[b.s]&&creditos<requisitos[b.s];}
+  if(bloqueada()){d.classList.add('bloqueada')}
+  d.onclick=()=>{
+   if(bloqueada())return;
+   ok=!ok;d.classList.toggle('aprobada');
+   creditos+=ok?mat[1]:-mat[1];guardar();actualizar();
+  }
+  box.appendChild(d);
+ });
+ cont.appendChild(box);
+});
+</script>
+</body>
+</html>
